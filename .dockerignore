@@ -1,0 +1,8 @@
+.cache
+build
+node_modules
+# Never ship local secrets, the Meridian CLI's database snapshots or git history
+.env
+.env.*
+.meridian
+.git

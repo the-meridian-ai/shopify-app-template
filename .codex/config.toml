@@ -1,0 +1,7 @@
+# MCP servers for Codex (read in trusted projects). Same servers as .mcp.json.
+[mcp_servers.meridian]
+url = "https://mcp.the-meridian.ai/mcp"
+
+[mcp_servers.shopify-dev-mcp]
+command = "npx"
+args = ["-y", "@shopify/dev-mcp@latest"]

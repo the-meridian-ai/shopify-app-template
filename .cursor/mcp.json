@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "meridian": {
+      "url": "https://mcp.the-meridian.ai/mcp"
+    },
+    "shopify-dev-mcp": {
+      "command": "npx",
+      "args": ["-y", "@shopify/dev-mcp@latest"]
+    }
+  }
+}
