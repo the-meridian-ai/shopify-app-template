@@ -68,8 +68,9 @@ Meridian builds the repository's root `Dockerfile` from a pushed commit of the c
 - Create the app with the Shopify app's client ID and secret, and connect the GitHub repository.
 - Add a database to the environment (Hosting, Database).
 - Set the environment's release command to `npx prisma migrate deploy`, and its health check path to `/health`. The container port can stay empty (3000).
-- Add the variable `SCOPES` with the same value as `scopes` in `shopify.app.toml` (`write_products` until you change it). The template reads its scopes from it, and Meridian does not inject it.
-- Create the production `MERIDIAN_API_KEY` when Meridian asks for one. Meridian injects the Shopify credentials, `SHOPIFY_APP_URL`, `DATABASE_URL` and the other Meridian variables itself (`managed_variables_list` lists them).
+- Create the production `MERIDIAN_API_KEY` when Meridian asks for one. Meridian injects the Shopify credentials, `SHOPIFY_APP_URL`, `SCOPES` (read from `scopes` in `shopify.app.toml` at the deployed commit), `DATABASE_URL` and the other Meridian variables itself (`managed_variables_list` lists them). Do not add `SCOPES` by hand: a value you set wins over the file's and goes stale when the scopes change.
+
+Until `application_url` in `shopify.app.toml` is the Meridian address (see below), readiness warns `shopify_app_url_mismatch`. That is expected before the first release of the Shopify side.
 
 Then deploy (`deployment_create`, `meridian deploy --watch`, or a push to the auto-deploy branch) and follow it with `deployment_get`. Ask the developer before deploying to production.
 

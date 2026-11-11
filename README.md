@@ -30,7 +30,7 @@ Push it to a GitHub repository of your own: Meridian deploys from GitHub.
 ## Quick start on Meridian
 
 1. **Create the app on Meridian.** In the [Meridian dashboard](https://app.the-meridian.ai), create an app with your Shopify app's client ID and secret (from the Shopify Dev Dashboard).
-2. **Connect the repository.** In the app's Settings, Integrations, connect GitHub and pick your repository. Then in Hosting: add a database (MySQL), set the release command to `npx prisma migrate deploy` and the health check path to `/health`, and add the variable `SCOPES` with the value of `scopes` in `shopify.app.toml` (`write_products` by default).
+2. **Connect the repository.** In the app's Settings, Integrations, connect GitHub and pick your repository. Then in Hosting: add a database (MySQL), and set the release command to `npx prisma migrate deploy`. Meridian injects `SCOPES` from `scopes` in `shopify.app.toml`, so there is no variable to add.
 3. **Deploy.** Push to the auto-deploy branch, or run `meridian deploy --watch`. Once it succeeds, point `application_url` in `shopify.app.toml` at your Meridian address and run `shopify app deploy`.
 
 The [Meridian CLI](https://help.the-meridian.ai/cli) (`npm install -g @the-meridian/cli`) runs the app locally on a Meridian MySQL database with `meridian dev`, and checks that the app is ready to deploy with `meridian doctor`.
@@ -77,7 +77,7 @@ Environment variables only. On Meridian hosting these are injected at each deplo
 | Variable | Read by | Set by |
 | --- | --- | --- |
 | `SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET`, `SHOPIFY_APP_URL` | Shopify's library | Meridian, or `shopify app dev` locally |
-| `SCOPES` | Shopify's library | You (same value as `scopes` in `shopify.app.toml`) |
+| `SCOPES` | Shopify's library | Meridian (from `scopes` in `shopify.app.toml`), or `shopify app dev` locally |
 | `DATABASE_URL` | Prisma | Meridian (the environment's database), `meridian dev`, or you |
 | `MERIDIAN_APP_ID`, `MERIDIAN_API_KEY`, `MERIDIAN_API_URL` | The Meridian SDK | Meridian, or `meridian dev` locally. Without them the SDK does nothing and the app still runs |
 
