@@ -27,7 +27,7 @@ Then get the app ready to deploy: run `app_readiness_get`, fix what fails or lis
 
 `prisma/schema.prisma` uses `provider = "mysql"` with `url = env("DATABASE_URL")`. Keep it that way, even though many examples online use PostgreSQL or SQLite:
 
-- MySQL is the engine a new Meridian app starts on and the one `meridian dev` developer databases use, and Meridian injects `DATABASE_URL`. The Prisma provider must match the app's database engine.
+- MySQL is the engine a new Meridian app starts on, `meridian dev` gives the app a developer database of the app's own engine (MySQL or PostgreSQL), and Meridian injects `DATABASE_URL`. The Prisma provider must match the app's database engine.
 - Only if the app's database is PostgreSQL (check it before changing anything), switch the provider to `postgresql`, delete the MySQL migration and create a new one.
 - SQLite writes Shopify sessions to a file inside the container, which every deploy replaces. Merchants get logged out, and Meridian refuses the deploy because billing cannot read the sessions.
 - Elsewhere, any MySQL 8 server works with the same schema.

@@ -4,7 +4,7 @@ Shopify's [React Router app template](https://github.com/Shopify/shopify-app-tem
 
 It stays a thin layer over Shopify's template. Meridian is the easy path, not a lock-in: configuration comes from environment variables, the server is a standard Node server in a plain `Dockerfile`, and the app runs on any host with a MySQL database.
 
-> **MySQL, not SQLite.** The Prisma schema uses `provider = "mysql"`: MySQL is the engine a new Meridian app starts on, and the one `meridian dev` developer databases use. Coding agents often default to PostgreSQL: keep MySQL, unless your Meridian app's database is PostgreSQL, in which case switch the provider to `postgresql` and regenerate the migration before the first deploy.
+> **MySQL, not SQLite.** The Prisma schema uses `provider = "mysql"`: MySQL is the engine a new Meridian app starts on, and `meridian dev` gives the app a developer database of the app's own engine (MySQL or PostgreSQL). Coding agents often default to PostgreSQL: keep MySQL, unless your Meridian app's database is PostgreSQL, in which case switch the provider to `postgresql` and regenerate the migration before the first deploy.
 
 ## Get the code
 
