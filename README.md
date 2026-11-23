@@ -25,6 +25,8 @@ npm install
 shopify app config link
 ```
 
+Linking replaces the whole `shopify.app.toml` with the configuration saved for that app in the Shopify Dev Dashboard. A newly created app has none of the template's settings there (no scopes, another webhooks API version), and `shopify app dev` then fails with "Failed to start dev preview". After linking a new app, compare with `git diff shopify.app.toml`: keep the new `client_id`, `name` and URLs, and put back the template's `scopes`, `[webhooks]` and `[events]`.
+
 Push it to a GitHub repository of your own: Meridian deploys from GitHub.
 
 ## Quick start on Meridian
@@ -51,9 +53,10 @@ Based on [Shopify/shopify-app-template-react-router](https://github.com/Shopify/
 
 | File | Change | Why |
 | --- | --- | --- |
-| `app/meridian/` | New folder: the SDK instance and the optional examples | Everything Meridian-specific in one place |
+| `app/meridian/` | New folder: the SDK instance, created with `browserTokenRefresh: false`, and the optional examples | Everything Meridian-specific in one place. Only the app's server refreshes the store's token, so a token copied from a page stops working when its hour ends |
 | `app/shopify.server.ts` | `afterAuth` hook calling `meridian.afterAuth(session)`, lines marked `Meridian` | Registers Meridian's webhooks and reports each install and the store's subscriptions |
-| `app/routes/app.tsx` | Mints the store's token and mounts `MeridianProvider` with the API that minted it, lines marked `Meridian` | Lets any page read plans, gates and usage with `useMeridian()` |
+| `app/routes/app.tsx` | Mints the store's token and mounts `MeridianProvider` with the API that minted it and a `getShopToken` that asks the app's server for a new token, lines marked `Meridian` | Lets any page read plans, gates and usage with `useMeridian()`, and keeps a page left open past the token's hour working |
+| `app/routes/app.meridian.shop-token.tsx` | New `POST /app/meridian/shop-token` route, lines marked `Meridian`: authenticates App Bridge's session token, then mints a new token for the store | Answers `getShopToken`. Without a valid session token it answers 401, and nothing is minted |
 | `app/routes/app._index.tsx` | Example gate in the sidebar, one tracked event when a product is generated, lines marked `Meridian example` | Shows the two SDK calls most apps need. Optional |
 | `app/routes/health.tsx` | New `/health` route answering 200 | Hosts check it before sending traffic, and a redirect counts as a failure |
 | `app/routes/_index/route.tsx` | Shop domain form removed from the landing page | Shopify's App Store requirement 2.3.1 forbids asking for a shop domain |
@@ -93,7 +96,7 @@ The template has no pricing page. Add one with the SDK's `MeridianPricingPage` w
 
 The image runs on any container host: give it `DATABASE_URL` for a MySQL 8 database and the Shopify variables, and it migrates the database at start (`npm run docker-start`). Without the Meridian variables the SDK stays silent.
 
-To remove Meridian entirely: delete `app/meridian/`, the lines marked `Meridian` and `Meridian example`, the `@the-meridian/sdk` dependency, and the `meridian` entries in the MCP configs and skill folders. The rest is Shopify's template on MySQL.
+To remove Meridian entirely: delete `app/meridian/`, `app/routes/app.meridian.shop-token.tsx`, the lines marked `Meridian` and `Meridian example`, the `@the-meridian/sdk` dependency, and the `meridian` entries in the MCP configs and skill folders. The rest is Shopify's template on MySQL.
 
 ## Pulling Shopify's template updates
 

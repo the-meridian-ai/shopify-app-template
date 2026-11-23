@@ -16,7 +16,7 @@ If an MCP server is not connected yet, ask the developer to approve it (`/mcp` i
 A new project made from this template still has placeholder values. Before changing code, ask the developer these questions, one at a time, each with the default in brackets. The skill's `references/template.md` has the details of each step.
 
 1. What does the app do, in one sentence? (Used for the app name, the landing page and this file's first line.)
-2. Is there already a Shopify app for it, or should one be created? (`shopify app config link` links an existing one and fills `client_id` in `shopify.app.toml`.)
+2. Is there already a Shopify app for it, or should one be created? (`shopify app config link` links an existing one or creates one. It replaces the whole `shopify.app.toml` with that app's configuration from the Shopify Dev Dashboard, so after linking a new app, put back the template's `scopes`, `[webhooks]` and `[events]` from `git diff shopify.app.toml`, or `shopify app dev` fails.)
 3. Is the app already on Meridian? If not, the developer creates it in the Meridian dashboard with the Shopify app's client ID and secret. Then find it with the MCP tool `apps_list` and link the project with `meridian link`.
 4. Keep the Meridian examples (one feature gate, one tracked event), adapt them to a real feature, or remove them? (Keep.)
 5. Paid plans now or later? (Later. "Now" means draft plans with `plan_create`, which the developer activates when ready.)
@@ -49,9 +49,10 @@ Checks before a commit: `npm run typecheck` and `npm run lint`.
 
 | Where | What it does |
 | --- | --- |
-| `app/meridian/meridian.server.ts` | Creates the SDK instance from `MERIDIAN_APP_ID`, `MERIDIAN_API_KEY` and `MERIDIAN_API_URL`. Server only |
+| `app/meridian/meridian.server.ts` | Creates the SDK instance from `MERIDIAN_APP_ID`, `MERIDIAN_API_KEY` and `MERIDIAN_API_URL`, with `browserTokenRefresh: false`: only this server, which holds the API key, refreshes the store's token. Server only |
 | `app/shopify.server.ts`, lines marked `Meridian` | `meridian.afterAuth(session)` after each install: registers Meridian's webhooks and reports the install and the store's subscriptions |
-| `app/routes/app.tsx`, lines marked `Meridian` | Mints the store's token and mounts `MeridianProvider` with `meridian.baseUrl` (the API that minted the token), so any page can call `useMeridian()` |
+| `app/routes/app.tsx`, lines marked `Meridian` | Mints the store's token and mounts `MeridianProvider` with `meridian.baseUrl` (the API that minted the token), so any page can call `useMeridian()`. Its `getShopToken` POSTs the refused token to `/app/meridian/shop-token` with a plain `fetch` (App Bridge adds the session token) when Meridian refuses the current one |
+| `app/routes/app.meridian.shop-token.tsx`, lines marked `Meridian` | `POST /app/meridian/shop-token`: runs `authenticate.admin` before anything else, then answers `{ shopToken }` from `meridian.mintShopToken({ shop, refusedShopToken })` with `Cache-Control: no-store`, or 503 when the mint returns null. Keep `authenticate.admin` first: this route hands out the store's token |
 | `app/meridian/examples.server.ts`, `ExampleGate.tsx`, lines marked `Meridian example` in `app/routes/app._index.tsx` | Optional examples: a server-side feature gate and a tracked usage event |
 | `app/routes/health.tsx` | `/health` answers 200 for the host's health check |
 

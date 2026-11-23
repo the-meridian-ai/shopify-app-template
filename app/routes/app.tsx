@@ -25,6 +25,23 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   };
 };
 
+// Meridian: when Meridian refuses the store's token, MeridianProvider asks this
+// app's server for a new one (app/routes/app.meridian.shop-token.tsx), passing
+// the refused token. App Bridge adds its session token to fetch calls to the
+// app's own origin, which is how that route knows the request. Null on any
+// other answer: the provider then shows Meridian's original refusal.
+async function getShopToken(refused: { shopToken: string }) {
+  const response = await fetch("/app/meridian/shop-token", {
+    method: "POST", // Meridian
+    headers: { "Content-Type": "application/json" }, // Meridian
+    body: JSON.stringify({ refusedShopToken: refused.shopToken }), // Meridian
+  }); // Meridian
+  if (response.status !== 200) return null; // Meridian
+  const body = await response.json().catch(() => null); // Meridian
+  const shopToken: unknown = body?.shopToken; // Meridian
+  return typeof shopToken === "string" ? shopToken : null; // Meridian
+} // Meridian
+
 export default function App() {
   const { apiKey, shopToken, meridianBaseUrl } = useLoaderData<typeof loader>();
 
@@ -34,11 +51,13 @@ export default function App() {
         <s-link href="/app">Home</s-link>
         <s-link href="/app/additional">Additional page</s-link>
       </s-app-nav>
-      {/* Meridian: plans, gates and usage for useMeridian() in any page */}
+      {/* Meridian: plans, gates and usage for useMeridian() in any page, and a
+          new token from this app's server when Meridian refuses one */}
       {shopToken ? (
         <MeridianProvider
           shopToken={shopToken}
           baseUrl={meridianBaseUrl ?? undefined}
+          getShopToken={getShopToken} // Meridian
         >
           <Outlet />
         </MeridianProvider>
